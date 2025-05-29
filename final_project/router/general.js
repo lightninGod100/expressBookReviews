@@ -1,40 +1,76 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
-const regd_users = express.Router();
+let isValid = require("./auth_users.js").isValid;
+let users = require("./auth_users.js").users;
+const public_users = express.Router();
 
-let users = [];
 
-const isValid = (username)=>{ //returns boolean
-//write code to check is the username is valid
-    for(let element of users){
-        if(element.username===username)
-            return false;
-    }
-    return true;
-}
-
-const authenticatedUser = (username,password)=>{ //returns boolean
-//write code to check if username and password match the one we have in records.
-    for(let element of users){
-        if(element.username===username && element.passowrd===password) return true;
-    }
-    return false;
-}
-
-//only registered users can login
-regd_users.post("/login", (req,res) => {
+public_users.post("/register", (req,res) => {
   //Write your code here
+  return res.status(300).json({message: "Yet to be implemented"});
+});
+
+// Get the book list available in the shop
+// Get the book list available in the shop
+public_users.get('/', function (req, res) {
+  // Assuming 'books' is an object or array of book entries
+  let list = [];
+  // If 'books' is an object like: { "1": {...}, "2": {...}, ... }
+  for (let key in books) {
+    list.push(books[key].title);
+  }
+  // Send response
+  return res.status(200).json(list);
+});
+
+
+// Get book details based on ISBN
+public_users.get('/isbn/:isbn',function (req, res) {
+  //Write your code here
+  let isbn=req.params.isbn;
+  let info={};
+    for(let key in books){
+        if(key==isbn)
+            { info=books[key]; break;}
+    }
+  return res.status(300).json(info);
+ });
   
-  return res.status(300).json({message: "Yet to be implemented"});
-});
-
-// Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+// Get book details based on author
+public_users.get('/author/:author',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  let author=req.params.author;
+  let details={};
+  for(let key in books){
+    if(books[key].author==author) {details=books[key]; break;}
+  }
+  return res.status(300).json(details);
 });
 
-module.exports.authenticated = regd_users;
-module.exports.isValid = isValid;
-module.exports.users = users;
+// Get all books based on title
+public_users.get('/title/:title',function (req, res) {
+  //Write your code here
+  let title=req.params.title;
+  let ans={};
+  for(let key in books){
+    if(books[key].title==title){
+        ans=books[key];
+        break;
+    }
+  }
+  return res.status(300).json(ans);
+});
+
+//  Get book review
+public_users.get('/review/:isbn',function (req, res) {
+    let isbn=req.params.isbn;
+    let reviews={};
+      for(let key in books){
+        
+          if(key==isbn)
+              { reviews=books[key].reviews; break;}
+      }
+  return res.status(300).json(reviews);
+});
+
+module.exports.general = public_users;
